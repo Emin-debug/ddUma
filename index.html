@@ -153,6 +153,19 @@
             background: #ff5252;
         }
 
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #ddd;
+            font-size: 0.95em;
+            padding: 10px 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
         .add-radio-section {
             background: white;
             border-radius: 15px;
@@ -307,7 +320,14 @@
         <div id="radiosGrid" class="radios-grid"></div>
 
         <div class="add-radio-section">
-            <h2>➕ Adicionar Nova Rádio</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0;">➕ Adicionar Nova Rádio</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="exportarRadios()" title="Baixar suas rádios como arquivo">💾 Exportar</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" title="Importar rádios de um arquivo">📂 Importar</button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importarRadios(event)">
 
             <div class="form-group">
                 <label for="radioName">Nome da Rádio:</label>
@@ -453,6 +473,74 @@
             document.getElementById('customIcon').value = icon;
             document.querySelectorAll('.icon-btn').forEach(btn => btn.classList.remove('selected'));
             event.target.classList.add('selected');
+        }
+
+        // Exportar rádios como JSON
+        function exportarRadios() {
+            const radios = JSON.parse(localStorage.getItem('radios')) || [];
+
+            if (radios.length === 0) {
+                alert('Nenhuma rádio para exportar!');
+                return;
+            }
+
+            const dataStr = JSON.stringify(radios, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `minhas-radios-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Rádios exportadas com sucesso!');
+        }
+
+        // Importar rádios de um arquivo JSON
+        function importarRadios(event) {
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const radios = JSON.parse(e.target.result);
+
+                    if (!Array.isArray(radios)) {
+                        throw new Error('Formato inválido');
+                    }
+
+                    // Validar estrutura
+                    const valido = radios.every(r =>
+                        r.nome && r.url && r.icon &&
+                        typeof r.nome === 'string' &&
+                        typeof r.url === 'string' &&
+                        typeof r.icon === 'string'
+                    );
+
+                    if (!valido) {
+                        throw new Error('Estrutura de rádios inválida');
+                    }
+
+                    const confirmar = confirm(`Deseja adicionar ${radios.length} rádio(s) às suas rádios atuais?`);
+
+                    if (confirmar) {
+                        const radiosatuais = JSON.parse(localStorage.getItem('radios')) || [];
+                        const radiasnovas = radiosatuais.concat(radios);
+                        localStorage.setItem('radios', JSON.stringify(radiasnovas));
+                        carregarRadios();
+                        alert('✅ Rádios importadas com sucesso!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao importar: ' + error.message + '\n\nCertifique-se de que o arquivo é um JSON válido exportado deste site.');
+                }
+            };
+
+            reader.readAsText(file);
+            event.target.value = '';
         }
 
         // Enter key para adicionar
