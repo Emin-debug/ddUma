@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minhas Rádios</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .radios-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .radio-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .radio-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .radio-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5em;
+            color: white;
+        }
+
+        .radio-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: block;
+            object-fit: cover;
+        }
+
+        .radio-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .radio-url {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 15px;
+            text-align: center;
+            word-break: break-all;
+            max-height: 40px;
+            overflow: hidden;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-play {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-play:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-play.playing {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-edit {
+            background: #f0f0f0;
+            color: #666;
+            font-size: 0.9em;
+            padding: 10px;
+        }
+
+        .btn-edit:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            font-size: 0.9em;
+            padding: 10px;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+            border: 2px solid #ddd;
+            font-size: 0.95em;
+            padding: 10px 15px;
+        }
+
+        .btn-secondary:hover {
+            background: #e8e8e8;
+            border-color: #667eea;
+        }
+
+        .add-radio-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .add-radio-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .icon-preview {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+
+        .icon-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            border: 2px solid #e0e0e0;
+            cursor: pointer;
+            font-size: 1.8em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        .icon-btn:hover {
+            border-color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .icon-btn.selected {
+            border-color: #667eea;
+            background: #f0f0ff;
+        }
+
+        .btn-add {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-add:hover {
+            transform: scale(1.02);
+        }
+
+        .empty-message {
+            text-align: center;
+            color: white;
+            font-size: 1.2em;
+            padding: 40px;
+        }
+
+        audio {
+            display: none;
+        }
+
+        .now-playing {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .now-playing h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .now-playing p {
+            color: #666;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .radios-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .add-radio-section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎙️ Minhas Rádios</h1>
+            <p>Clique para ouvir suas rádios favoritas</p>
+        </div>
+
+        <div id="nowPlaying" class="now-playing" style="display: none;">
+            <h3>Agora tocando:</h3>
+            <p id="playingName">-</p>
+        </div>
+
+        <div id="radiosGrid" class="radios-grid"></div>
+
+        <div class="add-radio-section">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 style="margin: 0;">➕ Adicionar Nova Rádio</h2>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="exportarRadios()" title="Baixar suas rádios como arquivo">💾 Exportar</button>
+                    <button class="btn btn-secondary" onclick="document.getElementById('fileInput').click()" title="Importar rádios de um arquivo">📂 Importar</button>
+                </div>
+            </div>
+            <input type="file" id="fileInput" accept=".json" style="display: none;" onchange="importarRadios(event)">
+
+            <div class="form-group">
+                <label for="radioName">Nome da Rádio:</label>
+                <input type="text" id="radioName" placeholder="Ex: Rádio Globo">
+            </div>
+
+            <div class="form-group">
+                <label for="radioUrl">URL do Stream:</label>
+                <textarea id="radioUrl" placeholder="Ex: https://stream.example.com/radio.m3u8"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Escolha um ícone:</label>
+                <div class="icon-preview" id="iconPreview"></div>
+                <input type="text" id="customIcon" placeholder="Ou cole aqui um emoji/URL de imagem" style="margin-top: 10px;">
+            </div>
+
+            <button class="btn-add" onclick="adicionarRadio()">Adicionar Rádio</button>
+        </div>
+    </div>
+
+    <audio id="audioPlayer"></audio>
+
+    <script>
+        const emojis = ['🎙️', '📻', '🎵', '🎶', '🎼', '♪', '♫', '🔊', '🎧', '🎸', '🎹', '🎤', '🎺', '🎷', '🥁'];
+
+        let radioAtual = null;
+
+        // Carregar rádios do localStorage
+        function carregarRadios() {
+            const radios = JSON.parse(localStorage.getItem('radios')) || [];
+            renderizarRadios(radios);
+        }
+
+        // Renderizar as rádios
+        function renderizarRadios(radios) {
+            const grid = document.getElementById('radiosGrid');
+
+            if (radios.length === 0) {
+                grid.innerHTML = '<div class="empty-message">Nenhuma rádio adicionada ainda. Adicione uma abaixo!</div>';
+                return;
+            }
+
+            grid.innerHTML = radios.map((radio, index) => `
+                <div class="radio-card">
+                    ${radio.icon.startsWith('http') ?
+                        `<img src="${radio.icon}" alt="${radio.nome}">` :
+                        `<div class="radio-icon">${radio.icon}</div>`
+                    }
+                    <div class="radio-name">${radio.nome}</div>
+                    <div class="radio-url">${radio.url}</div>
+                    <div class="button-group">
+                        <button class="btn btn-play" id="btn-${index}" onclick="toggleRadio(${index}, '${radio.nome}', '${radio.url}')">
+                            ▶️ Ouvir
+                        </button>
+                        <button class="btn btn-delete" onclick="deletarRadio(${index})">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle reprodução de rádio
+        function toggleRadio(index, nome, url) {
+            const player = document.getElementById('audioPlayer');
+            const btn = document.getElementById(`btn-${index}`);
+            const nowPlaying = document.getElementById('nowPlaying');
+            const playingName = document.getElementById('playingName');
+
+            if (radioAtual === index && !player.paused) {
+                player.pause();
+                btn.classList.remove('playing');
+                btn.textContent = '▶️ Ouvir';
+                radioAtual = null;
+                nowPlaying.style.display = 'none';
+            } else {
+                // Pausar a rádio anterior
+                document.querySelectorAll('.btn-play').forEach(b => {
+                    b.classList.remove('playing');
+                    b.textContent = '▶️ Ouvir';
+                });
+
+                player.src = url;
+                player.play().catch(error => {
+                    alert('Erro ao conectar com a rádio. Verifique a URL: ' + url);
+                    console.error(error);
+                });
+
+                btn.classList.add('playing');
+                btn.textContent = '⏸️ Pausar';
+                radioAtual = index;
+                playingName.textContent = nome;
+                nowPlaying.style.display = 'block';
+            }
+        }
+
+        // Adicionar nova rádio
+        function adicionarRadio() {
+            const nome = document.getElementById('radioName').value.trim();
+            const url = document.getElementById('radioUrl').value.trim();
+            let icon = document.getElementById('customIcon').value.trim();
+
+            if (!nome || !url) {
+                alert('Preencha o nome e a URL da rádio!');
+                return;
+            }
+
+            if (!icon) {
+                icon = '🎙️';
+            }
+
+            const radios = JSON.parse(localStorage.getItem('radios')) || [];
+            radios.push({ nome, url, icon });
+            localStorage.setItem('radios', JSON.stringify(radios));
+
+            // Limpar formulário
+            document.getElementById('radioName').value = '';
+            document.getElementById('radioUrl').value = '';
+            document.getElementById('customIcon').value = '';
+
+            carregarRadios();
+        }
+
+        // Deletar rádio
+        function deletarRadio(index) {
+            if (confirm('Tem certeza que deseja deletar esta rádio?')) {
+                const radios = JSON.parse(localStorage.getItem('radios')) || [];
+                radios.splice(index, 1);
+                localStorage.setItem('radios', JSON.stringify(radios));
+                carregarRadios();
+            }
+        }
+
+        // Renderizar seletor de emojis
+        function renderizarEmojiPreview() {
+            const preview = document.getElementById('iconPreview');
+            preview.innerHTML = emojis.map(emoji =>
+                `<button type="button" class="icon-btn" onclick="selecionarIcon('${emoji}')">${emoji}</button>`
+            ).join('');
+        }
+
+        // Selecionar ícone
+        function selecionarIcon(icon) {
+            document.getElementById('customIcon').value = icon;
+            document.querySelectorAll('.icon-btn').forEach(btn => btn.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        // Exportar rádios como JSON
+        function exportarRadios() {
+            const radios = JSON.parse(localStorage.getItem('radios')) || [];
+
+            if (radios.length === 0) {
+                alert('Nenhuma rádio para exportar!');
+                return;
+            }
+
+            const dataStr = JSON.stringify(radios, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `minhas-radios-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert('✅ Rádios exportadas com sucesso!');
+        }
+
+        // Importar rádios de um arquivo JSON
+        function importarRadios(event) {
+            const file = event.target.files[0];
+
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const radios = JSON.parse(e.target.result);
+
+                    if (!Array.isArray(radios)) {
+                        throw new Error('Formato inválido');
+                    }
+
+                    // Validar estrutura
+                    const valido = radios.every(r =>
+                        r.nome && r.url && r.icon &&
+                        typeof r.nome === 'string' &&
+                        typeof r.url === 'string' &&
+                        typeof r.icon === 'string'
+                    );
+
+                    if (!valido) {
+                        throw new Error('Estrutura de rádios inválida');
+                    }
+
+                    const confirmar = confirm(`Deseja adicionar ${radios.length} rádio(s) às suas rádios atuais?`);
+
+                    if (confirmar) {
+                        const radiosatuais = JSON.parse(localStorage.getItem('radios')) || [];
+                        const radiasnovas = radiosatuais.concat(radios);
+                        localStorage.setItem('radios', JSON.stringify(radiasnovas));
+                        carregarRadios();
+                        alert('✅ Rádios importadas com sucesso!');
+                    }
+                } catch (error) {
+                    alert('❌ Erro ao importar: ' + error.message + '\n\nCertifique-se de que o arquivo é um JSON válido exportado deste site.');
+                }
+            };
+
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Enter key para adicionar
+        document.addEventListener('DOMContentLoaded', () => {
+            renderizarEmojiPreview();
+            carregarRadios();
+
+            document.getElementById('radioUrl').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') adicionarRadio();
+            });
+        });
+    </script>
+</body>
+</html>
